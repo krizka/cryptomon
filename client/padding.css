@@ -1,0 +1,40 @@
+.p-t-8 {
+    padding-top: 8px;
+}
+
+.p-b-8 {
+    padding-bottom: 8px;
+}
+
+.p-h-4 {
+    padding-right: 4px;
+    padding-left: 4px;
+}
+.p-r-4 {
+    padding-right: 4px;
+}
+.p-l-4 {
+    padding-left: 4px;
+}
+
+.m-t-16 {
+    margin-top: 16px;
+}
+.m-b-16 {
+    margin-bottom: 16px;
+}
+.m-b-8 {
+    margin-bottom: 8px;
+}
+.m-b-4 {
+    margin-bottom: 4px;
+}
+
+.m-r-5 {
+    margin-right: 5px;
+}
+
+.m-h-10 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

@@ -1,0 +1,5 @@
+.idea/libraries/*
+.idea/workspace.xml
+
+node_modules/
+.npm

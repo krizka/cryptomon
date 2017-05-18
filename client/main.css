@@ -1,0 +1,11 @@
+/* CSS declarations go here */
+
+body {
+    background: url("logo_cm512.png") no-repeat center;
+    background-attachment: fixed;
+}
+
+td.number {
+    text-align: right;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
