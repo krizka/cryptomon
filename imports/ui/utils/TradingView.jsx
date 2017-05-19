@@ -61,6 +61,9 @@ export const TradingViewGraph = React.createClass({
             client_id: 'tradingview.com',
             user_id: 'public_user_id',
             chart_type: 'Line',
+            overrides: {
+                'mainSeriesProperties.style': 2, // bars = 0 candles = 1 line = 2 area = 3 heiken ashi = 8 hollow candles = 9
+            },
             favorites: {
                 chartTypes: ["Line"]
             }
