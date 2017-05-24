@@ -11,19 +11,6 @@ import { CURRENCIES } from '/imports/crypto/currencies';
 import { checkLoading } from './check-loading';
 
 
-const script = [
-    { src: "/charting/charting_library.min.js", },
-    // { src: "/charting/static/bundles/vendors.210b3b7511cac4a98109.js", },
-    // { src: "/charting/static/bundles/library.5f9190dba877443caabd.js", },
-];
-const link = [
-    {
-        type: "text/css",
-        href: "/charting/static/bundles/library.79e3f90d582b491b88e5d5752709fb0e.css",
-        rel: "stylesheet"
-    }
-];
-
 export const TradingViewGraph = React.createClass({
     componentDidMount() {
         checkLoading('TradingView', this.initGraph);
@@ -73,7 +60,7 @@ export const TradingViewGraph = React.createClass({
 
     render() {
         return (<div>
-                <Helmet script={script} link={link}/>
+                <Helmet script={[{src: "/charting/charting_library.min.js"}]}/>
                 <div id="tv-library-container" className="chart-page">
                     <div className="tv-side-toolbar"/>
                     <div className="tv-side-panel"/>
@@ -86,7 +73,6 @@ export const TradingViewGraph = React.createClass({
                     </div>
                 </div>
             </div>
-
         );
     }
 });

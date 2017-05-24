@@ -49,7 +49,7 @@ CURRENCIES.forEach(c => {
 const loanToBar = (symbolInfo, l) => {
     const offers = l.cur[symbolInfo.ticker].offers;
 
-    let min = offers.min.rate;
+    let min = offers.min ? offers.min.rate : 0; // XXX save null rate in DB
     return {
         time: l.createdAt.getTime(),
         open: min,//offers.avg,
@@ -61,13 +61,31 @@ const loanToBar = (symbolInfo, l) => {
 };
 
 
+function reduceBars(start, bars, resolution) {
+    const res = resolution*60*1000;
+
+    return _.reduce(bars, (result, bar) => {
+        const last = _.last(result);
+        if (!last || (bar.time - last.time > res)) {
+            result.push({ ...bar });
+        } else {
+            Object.assign(last, {
+                close: bar.close,
+                low: Math.min(last.low, bar.low),
+                high: Math.max(last.high, bar.high),
+                volume: last.volume + bar.volume
+            });
+        }
+        return result;
+    }, start);
+}
 function setDatafeed(props) {
     const datafeed = {
         onReady(config) {
             setTimeout(() => config({
                 exchanges: [{ value: 'poloniex', name: 'Poloniex', desc: 'Poloniex Exchange' }],
                 supported_types: CURRENCIES.map(c => ({ name: c, value: c })),
-                supported_resolutions: [5, 15, 240, "D", "6M"],
+                supported_resolutions: [5, 15, 30, 60, 240, 720, "D"],
                 supports_marks: false,
                 supports_timescale_marks: false,
                 supports_time: false,
@@ -89,8 +107,11 @@ function setDatafeed(props) {
                 if (error)
                     return onErrorCallback(error.message);
 
-                const bars = loans.map(l => loanToBar(symbolInfo, l));
-                onHistoryCallback(bars, { noData: !loans.length });
+                // XXX simplify
+                this.bars = (this.bars || []).concat(loans.map(l => loanToBar(symbolInfo, l)));
+                this.reduced = reduceBars([], this.bars, +resolution);
+                let noData = !loans.length;
+                onHistoryCallback(noData ? [] : this.reduced, { noData });
             });
         },
 
@@ -98,10 +119,12 @@ function setDatafeed(props) {
             this.subs = this.subs || {};
 
             let date = new Date();
-
+            const self = this;
             const observe = findPoloniexLoansAfter(date).observeChanges({
                 added(id, doc) {
-                    onRealtimeCallback(loanToBar(symbolInfo, doc));
+                    self.reduced = reduceBars(self.reduced, [loanToBar(symbolInfo, doc)], +resolution);
+                    const last = _.last(self.reduced);
+                    onRealtimeCallback(last);
                 }
             });
 
