@@ -107,6 +107,8 @@ function setDatafeed(props) {
                 if (error)
                     return onErrorCallback(error.message);
 
+                if (firstDataRequest)
+                    delete this.bars;
                 // XXX simplify
                 this.bars = (this.bars || []).concat(loans.map(l => loanToBar(symbolInfo, l)));
                 this.reduced = reduceBars([], this.bars, +resolution);

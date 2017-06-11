@@ -4,8 +4,8 @@
 
 
 export const CURRENCIES = [
-    'BTS',
     'BTC',
+    'BTS',
     'CLAM',
     'DOGE',
     'DASH',
@@ -18,3 +18,4 @@ export const CURRENCIES = [
     'FCT',
 ];
 
+export const MARGIN_PAIRS = CURRENCIES.slice(1).map(c => `BTC_${c}`);

@@ -6,12 +6,18 @@
     "deploy": "./deploy.sh"
   },
   "dependencies": {
+    "@you21979/poloniex.com": "^0.0.9",
+    "autobahn": "^17.5.2",
     "babel-runtime": "^6.20.0",
+    "eventemitter": "^0.3.3",
     "immutability-helper": "^2.2.0",
     "meteor-node-stubs": "~0.2.4",
+    "moment": "^2.18.1",
     "react": "^15.5.4",
     "react-bootstrap": "^0.31.0",
     "react-bs-notifier": "^4.3.2",
+    "react-d3-basic": "^1.6.11",
+    "react-d3-components": "^0.6.6",
     "react-dom": "^15.5.4",
     "react-helmet": "^5.0.3",
     "react-komposer": "^2.0.0",
@@ -20,6 +26,8 @@
     "react-router-bootstrap": "rr-v3",
     "recompose": "^0.23.4",
     "redux": "^3.6.0",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "tcomb-form": "^0.9.16",
+    "ws": "latest"
   }
 }

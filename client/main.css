@@ -1,10 +1,21 @@
 /* CSS declarations go here */
 
 body {
-    background: url("logo_cm512.png") no-repeat center;
-    background-attachment: fixed;
+    /*background: url("logo_cm512.png") no-repeat center;*/
+    /*background-attachment: fixed;*/
 }
 
+body::after {
+    content: "";
+    background: url("logo_cm512.png") no-repeat center fixed;
+    opacity: 0.05;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    z-index: -1;
+}
 td.number {
     text-align: right;
     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;

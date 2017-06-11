@@ -1,0 +1,127 @@
+/**
+ * Created by kriz on 03/06/2017.
+ */
+
+import { createPrivateApi } from '@you21979/poloniex.com';
+import { wrapPromiseCall } from '../../utils/wrap-promise';
+import moment from 'moment';
+
+function createMockApi() {
+    function formatDate() {
+        return moment().utc().format('YYYY-MM-DD hh:mm:ss');
+    }
+
+    const api = {
+        orders: [],
+
+        marginBuy(currencyPair, rate, amount, { loanRate }) {
+            let amountStr = amount.toFixed(8);
+            const result = {
+                "success": 1,
+                "message": "Margin order placed.",
+                "orderNumber": "154407998",
+                "resultingTrades": {
+                    [currencyPair]: [{
+                        "amount": amountStr,
+                        "date": moment().utc().format('YYYY-MM-DD hh:mm:ss'),
+                        "total": amountStr,
+                        "tradeID": "1213556",
+                        "type": 'buy'
+                    }]
+                }
+            };
+
+            return result;
+        },
+
+        marginSell(currencyPair, rate, amount, { loanRate }) {
+            let amountStr = amount.toFixed(8);
+            const result = {
+                "success": 1,
+                "message": "Margin order placed.",
+                "orderNumber": "154407998",
+                "resultingTrades": {
+                    [currencyPair]: [{
+                        "amount": amountStr,
+                        "date": formatDate(),
+                        "total": amountStr,
+                        "tradeID": "1213556",
+                        "type": 'sell'
+                    }]
+                }
+            };
+
+            return result;
+        },
+
+        getMarginPosition(currencyPair) {
+            return {
+                "amount": "40.94717831",
+                "total": "-0.09671314",
+                "basePrice": "0.00236190",
+                "liquidationPrice": -1,
+                "pl": "-0.00058655",
+                "lendingFees": "-0.00000038",
+                "type": "long"
+            }
+        },
+
+        closeMarginPosition({ currencyPair }) {
+            const result = {
+                "success": 1,
+                "message": "Successfully closed margin position.",
+                "resultingTrades": {
+                    [currencyPair]: [{
+                        "amount": "7.09215901",
+                        "date": formatDate(),
+                        "rate": "0.00235337",
+                        "total": "0.01669047",
+                        "tradeID": "1213346",
+                        "type": "sell"
+                    }, {
+                        "amount": "24.00289920",
+                        "date": formatDate(),
+                        "rate": "0.00235321",
+                        "total": "0.05648386",
+                        "tradeID": "1213347",
+                        "type": "sell"
+                    }]
+                }
+            };
+            return result;
+        },
+
+        cancelOrder(orderNumber) {
+            return { success: 1 };
+        },
+
+        moveOrder(orderNumber, rate) {
+            return { success: 1, orderNumber };
+        },
+
+        returnOpenOrders({ currencyPair }) {
+            return [];
+        }
+
+    };
+    return api;
+}
+
+export function poloniexPrivateApi(apiKey, apiSecret) {
+    if (!apiKey) {
+        console.warn('key is not defined, using mock api');
+        return createMockApi();
+    } else {
+        const api = createPrivateApi(apiKey, apiSecret);
+
+
+        // make it meteorish
+        _.forEach(api, (method, name) => {
+            if (typeof method === 'function')
+                api[name] = wrapPromiseCall(method, api)
+        });
+
+        api.nonce *= 10000;
+        return api;
+    }
+}

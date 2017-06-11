@@ -21,3 +21,4 @@ percolate:migrations
 percolate:synced-cron
 reactrouter:react-router-ssr
 twbs:bootstrap
+jagi:astronomy

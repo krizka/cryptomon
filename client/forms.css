@@ -1,0 +1,29 @@
+.label-help {
+    font-size: 12px;
+    font-weight: 200;
+    color: #999999;
+}
+
+.form-legend {
+    font-size: 16px;
+    font-weight: 400;
+}
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+legend {
+    margin-bottom: 16px;
+}
+
+.btn-remove {
+    color: #fff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
+}
+
+.joystick-button {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}

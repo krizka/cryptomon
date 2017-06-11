@@ -15,7 +15,6 @@ export function updateTicks() {
     const data = request(`https://poloniex.com/public?command=returnTicker`);
     const ticker = JSON.parse(data.body);
 
-
     PoloniexTickerCol.insert({
         createdAt,
         ticker,

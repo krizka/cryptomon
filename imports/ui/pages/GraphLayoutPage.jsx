@@ -6,8 +6,10 @@ import React from 'react';
 import { Link } from 'react-router';
 import { CURRENCIES } from '/imports/crypto/currencies';
 import { ButtonGroup, Col, Grid, Row } from 'react-bootstrap';
+import { dirName } from '../../utils/dir-name';
 
-export const GraphLayoutPage = ({ children }) => {
+export const GraphLayoutPage = ({ children, location }) => {
+    const dirPath = dirName(location.pathname);
     return <Grid>
         <Row className="m-b-16">
             <Col md={12}>
@@ -15,7 +17,7 @@ export const GraphLayoutPage = ({ children }) => {
                     {CURRENCIES.map(c =>
                         <Link
                             key={c}
-                            to={`/loans/graph/${c}`}
+                            to={`${dirPath}/BTC_${c}`}
                             className="btn btn-default"
                             activeClassName="btn-info"
                         >{c}</Link>)}

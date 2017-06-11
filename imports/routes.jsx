@@ -16,7 +16,10 @@ import { LoansTablePage } from './ui/pages/LoansTablePage';
 import { LinksPage } from './ui/pages/LinksPage';
 import favico from './ui/utils/Favico';
 import { LoansGraphPage } from './ui/pages/LoansGraphPage';
+import { OrderBookPage } from './ui/pages/OrderBookPage';
 import { GraphLayoutPage } from './ui/pages/GraphLayoutPage';
+import { MarginOrderPage } from './ui/pages/MarginOrderPage';
+import { OrdersTableWithData } from './toys/poloniex_ticker/ui/OrdersTable';
 
 const AppRoutes = (
     <Route path="/" component={AppLayout}>
@@ -28,6 +31,15 @@ const AppRoutes = (
                 <IndexRedirect to="BTC"/>
                 <Route path=":symbol" component={LoansGraphPage}/>
             </Route>
+        </Route>
+        <Route path="orders" component={GraphLayoutPage}>
+            <IndexRedirect to="BTC"/>
+            <Route path="table/:currencyPair" component={OrdersTableWithData} />
+            <Route path=":currencyPair" component={OrderBookPage}/>
+        </Route>
+        <Route path="margin" component={GraphLayoutPage}>
+            <IndexRedirect to="BTC_BTS"/>
+            <Route path=":currencyPair" component={MarginOrderPage}/>
         </Route>
     </Route>
 );

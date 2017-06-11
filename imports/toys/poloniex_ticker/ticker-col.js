@@ -27,3 +27,9 @@ Object.assign(PoloniexTickerCol, {
         );
     },
 });
+
+export const pushColName = 'poloniex_push_ticker';
+export const PoloniexPushTickerCol = new Meteor.Collection(pushColName);
+
+export const PoloniexTrades = new Meteor.Collection('poloniex_trades');
+export const PoloniexOrders = new Meteor.Collection('poloniex_orders_book');

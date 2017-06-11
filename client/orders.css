@@ -1,0 +1,7 @@
+table.order tr {
+    font-size: 9px;
+}
+
+table.order > tbody > tr > td {
+    padding: 0;
+}

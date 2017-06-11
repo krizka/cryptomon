@@ -15,6 +15,11 @@ export const LinksPage = React.createClass({
                             <tbody>
                             <tr>
                                 <td>
+                                    <Link to="/orders">Poloniex Orders Graph</Link>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
                                     <Link to="/loans/graph">Poloniex Loans Graphs</Link>
                                 </td>
                             </tr>

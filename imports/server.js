@@ -13,11 +13,16 @@ import './server/methods';
 import './server/fixtures';
 import cronJobs from './server/cron_jobs';
 import Fiber from 'fibers';
+import './toys';
 import './toys/poloniex_loans';
+import './toys/poloniex_orderbook';
+import startup  from './server/startup';
+
 
 
 
 Meteor.startup(() => {
     initMigrations();
     cronJobs();
+    startup();
 });
