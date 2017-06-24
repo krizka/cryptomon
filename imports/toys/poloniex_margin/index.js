@@ -3,9 +3,9 @@
  */
 
 import './methods';
-import { runMarginCloser } from './margin-closer';
+// import { runMarginCloser } from '../poloniex_ticker/margin-closer';
 import { runUpdateMarginOrder } from './state-updater';
 
-runMarginCloser();
-runUpdateMarginOrder();
+// runMarginCloser();
+// runUpdateMarginOrder();
 

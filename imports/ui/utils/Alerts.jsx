@@ -36,7 +36,7 @@ export class Alerts extends React.Component {
             message
         };
 
-        Alerts.setState({
+        this.setState({
             alerts: [...this.state.alerts, newAlert]
         });
     }

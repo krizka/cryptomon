@@ -19,8 +19,6 @@ import './toys/poloniex_orderbook';
 import startup  from './server/startup';
 
 
-
-
 Meteor.startup(() => {
     initMigrations();
     cronJobs();

@@ -19,6 +19,7 @@ export function wrapPromise(promise) {
 export function wrapPromiseCall(promiseFunc, context) {
     return Meteor.wrapAsync(function(...args) {
         const cb = args.pop();
-        promiseFunc.apply(context, args).then(res => cb(null, res), err => cb(err))
+        const promise = promiseFunc.apply(context, args);
+        promise.then(res => cb(null, res), err => cb(err))
     });
 }

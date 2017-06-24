@@ -105,3 +105,10 @@ export function fromAstronomy(cls, fields) {
     const [ type, options ] = convertField({ type: cls }, fields);
     return { type, options };
 }
+
+Class.createWithFields = function (definition) {
+    definition.fields = { ...definition.fields };
+    const withFields = definition.withFields;
+    _.each(this.definition.fields, (field, name) => withFields[name] && (definition.fields[name] = field));
+    return Class.create(definition);
+};

@@ -3,11 +3,15 @@
  */
 
 import { EventEmitter }  from 'eventemitter';
-import { getOrders, getTicker, ticker } from './push-ticker';
+import { getOrders, getTicker, getTrades, ticker } from './push-ticker';
 import { pushColName } from './ticker-col';
-
+import { check } from 'meteor/check';
 
 export const tickerEmitter = new EventEmitter;
+tickerEmitter.subscribe = function (event, cb) {
+    this.on(event, cb);
+    return () => this.removeListener(event, cb);
+};
 
 Meteor.publish('poloniex.ticker', function (currencyPair = 'any') {
     const update = (value) => {
@@ -29,58 +33,109 @@ Meteor.publish('poloniex.ticker', function (currencyPair = 'any') {
 
 let ORDERS_COL_NAME = 'poloniex_orders_book';
 
-Meteor.publish('poloniex.orders', function () {
+Meteor.publish('poloniex.orders', function (currencyPair) {
+    const self = this;
+    this.sent = function(id) {
+        const col = self._session.collectionViews[ORDERS_COL_NAME];
+        // let col = this._documents[ORDERS_COL_NAME];
+        return col && col.documents[id];
+    };
+
+
     function makeId(value) {
-        return `${value.currencyPair}_${value.rate.toFixed(8)}`;
+        return `${value.currencyPair}_${value.rate}_${value.type}`;
     }
 
-    const change = (value, exists) => {
+    function filterOut(value) {
+        const best = getOrders()[value.currencyPair].best[value.type];
+        if (value.type === 'bid') {
+            return value.rate < best * 0.99;
+        } else {
+            return value.rate > best * 1.01;
+        }
+    }
+
+    const change = (value) => {
+        if (value.currencyPair !== currencyPair)
+            return;
+
         const id = makeId(value);
-        if (exists)
-            console.log('*', id) || this.changed(ORDERS_COL_NAME, id, value);
-        else
-            console.log('+', id) || this.added(ORDERS_COL_NAME, id, value);
-    };
-    const removed = value => {
-        let id = makeId(value);
-        console.log('-', id) || this.removed(ORDERS_COL_NAME, id);
+        const sent = this.sent(id);
+
+        if (value.amount) {
+            if (sent)
+                this.changed(ORDERS_COL_NAME, id, value);
+            else {
+                if (!filterOut(value))
+                    this.added(ORDERS_COL_NAME, id, value);
+            }
+        } else if (sent) {
+            this.removed(ORDERS_COL_NAME, id);
+        }
     };
 
-    const orders = getOrders();
-    _.each(orders, pair => {
-        _.each(pair, data => change(data, false));
-    });
+    const orders = getOrders()[currencyPair];
+
+    if (!orders)
+        return this.ready();
+
+    _.each(orders.bid, data => change(data));
+    _.each(orders.ask, data => change(data));
 
     tickerEmitter.on('order', change);
-    tickerEmitter.on('orderRemove', removed);
     this.onStop(() => {
         tickerEmitter.removeListener('order', change);
-        tickerEmitter.removeListener('orderRemove', removed);
-
     });
 
     this.ready();
-
 });
 
 let TRADES_COL_NAME = 'poloniex_trades';
 
-Meteor.publish('poloniex.trades', function () {
-    const trade = data => {
-        const id = data.time;
-        this.added(TRADES_COL_NAME, id, value);
+Meteor.publish('poloniex.trades', function (currencyPair, timeSec) {
+    const trades = [];
+
+    const sendTrade = data => {
+        if (data.currencyPair !== currencyPair)
+            return;
+
+        const id = data.date;
+        this.added(TRADES_COL_NAME, id, data);
+        trades.push(data);
+        // remove old
+        const lastTime = data.date - timeSec * 1000;
+        const idx = trades.findIndex(t => t.date >= lastTime);
+        if (idx > 0) {
+            for (let i = 0; i < idx; i++) {
+                this.removed(TRADES_COL_NAME, trades[i].time);
+            }
+            trades.splice(0, idx);
+        }
     };
+
+    getTrades(currencyPair, timeSec).forEach(sendTrade);
+
     this.onStop(() => {
-        tickerEmitter.removeListener('trade', trade);
+        tickerEmitter.removeListener('trade', sendTrade);
     });
-    tickerEmitter.on('trade', trade);
+    tickerEmitter.on('trade', sendTrade);
 
-    // const orders = getTrades();
-    // _.each(orders, (type, data) => {
-    //     _.each(data, rate =>
-    //         this.added(TRADES_COL_NAME, `${type}_${rate}`, data)
-    //     )
-    // });
     this.ready();
+});
 
+
+const POLONIEX_INFO_COL = 'poloniex_info';
+Meteor.publish('poloniex.currencyInfo', function (currencyPair) {
+    check(currencyPair, String);
+
+    const id = `info_${currencyPair}`;
+    const updateInfo = (info, first) => {
+        if (first)
+            this.added(POLONIEX_INFO_COL, id, info);
+        else
+            this.changed(POLONIEX_INFO_COL, id, info)
+    };
+
+    const stop = tickerEmitter.subscribe(id, updateInfo);
+    this.onStop(stop);
 });

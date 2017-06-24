@@ -31,7 +31,7 @@ export const MarginOpenOrdersComponent = React.createClass({
                 {orders.map(o => (
                     <tr key={o._id} onClick={()=>onSelect(o)}>
                         <td>{o.currencyPair}</td>
-                        <td>{o.rate.toFixed(8)}</td>
+                        <td>{o.rate}</td>
                         <td>{getTicker(o.currencyPair)}</td>
                         {/*<td>{o.closer.toFixed(8)}</td>*/}
                         <td>{o.amount}</td>

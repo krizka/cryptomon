@@ -5,3 +5,31 @@ table.order tr {
 table.order > tbody > tr > td {
     padding: 0;
 }
+
+.ob-rate {
+    min-width: 70px;
+    width: 20%
+}
+
+.ob-amount {
+    width: 80%
+}
+
+.ob-amount-bar {
+    background: black;
+    float: left
+}
+
+.tt-rate {
+    min-width: 65px;
+    width: 15%
+}
+
+.tt-type {
+    min-width: 25px;
+    width: 8%
+}
+
+.tt-amount {
+    width: 77%
+}

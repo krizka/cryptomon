@@ -27,3 +27,8 @@ legend {
     padding-left: 4px !important;
     padding-right: 4px !important;
 }
+
+.btn.tiny {
+    padding: 0;
+    line-height: 9px;
+}

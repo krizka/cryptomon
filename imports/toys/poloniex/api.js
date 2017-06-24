@@ -2,13 +2,16 @@
  * Created by kriz on 03/06/2017.
  */
 
-import { createPrivateApi } from '@you21979/poloniex.com';
+import { createPrivateApi, PublicApi, Constant } from '@you21979/poloniex.com';
 import { wrapPromiseCall } from '../../utils/wrap-promise';
 import moment from 'moment';
 
 function createMockApi() {
     function formatDate() {
         return moment().utc().format('YYYY-MM-DD hh:mm:ss');
+    }
+    function orderNumber() {
+        return Random._randomString(10, '0123456789');
     }
 
     const api = {
@@ -19,7 +22,7 @@ function createMockApi() {
             const result = {
                 "success": 1,
                 "message": "Margin order placed.",
-                "orderNumber": "154407998",
+                "orderNumber": orderNumber(),
                 "resultingTrades": {
                     [currencyPair]: [{
                         "amount": amountStr,
@@ -39,7 +42,7 @@ function createMockApi() {
             const result = {
                 "success": 1,
                 "message": "Margin order placed.",
-                "orderNumber": "154407998",
+                "orderNumber": orderNumber(),
                 "resultingTrades": {
                     [currencyPair]: [{
                         "amount": amountStr,
@@ -51,6 +54,44 @@ function createMockApi() {
                 }
             };
 
+            return result;
+        },
+
+        buy(currencyPair, rate, amount,) {
+            let amountStr = amount.toFixed(8);
+            const result = {
+                "success": 1,
+                "message": "Order placed.",
+                "orderNumber": orderNumber(),
+                "resultingTrades": {
+                    [currencyPair]: [{
+                        "amount": amountStr,
+                        "date": formatDate(),
+                        "total": amountStr,
+                        "tradeID": "1213556",
+                        "type": 'buy'
+                    }]
+                }
+            };
+            return result;
+        },
+
+        sell(currencyPair, rate, amount,) {
+            let amountStr = amount.toFixed(8);
+            const result = {
+                "success": 1,
+                "message": "Order placed.",
+                "orderNumber": orderNumber(),
+                "resultingTrades": {
+                    [currencyPair]: [{
+                        "amount": amountStr,
+                        "date": formatDate(),
+                        "total": amountStr,
+                        "tradeID": "1213556",
+                        "type": 'sell'
+                    }]
+                }
+            };
             return result;
         },
 
@@ -99,7 +140,7 @@ function createMockApi() {
             return { success: 1, orderNumber };
         },
 
-        returnOpenOrders({ currencyPair }) {
+        openOrders(currencyPair) {
             return [];
         }
 
@@ -107,21 +148,89 @@ function createMockApi() {
     return api;
 }
 
+let realPrivateApi;
+
 export function poloniexPrivateApi(apiKey, apiSecret) {
     if (!apiKey) {
         console.warn('key is not defined, using mock api');
         return createMockApi();
     } else {
+        if (realPrivateApi)
+            return realPrivateApi;
+
         const api = createPrivateApi(apiKey, apiSecret);
 
 
+        api.incrementNonce = function() {
+            return this.nonce = Date.now();
+        };
+        const origQuery = api.query;
+        api.query = function () {
+            console.log('nonce', this.nonce);
+            return origQuery.apply(this, arguments);
+        };
+
         // make it meteorish
-        _.forEach(api, (method, name) => {
-            if (typeof method === 'function')
-                api[name] = wrapPromiseCall(method, api)
+        [
+            'buy',
+            'sell',
+            'marginBuy',
+            'marginSell',
+            'cancelOrder',
+            'openOrders',
+            'moveOrder',
+            'closeMarginPosition',
+            'getMarginPosition',
+            'tradeHistory',
+        ].forEach(name => {
+            if (typeof api[name] === 'function') {
+                const method = api[name];
+                api[name] = wrapPromiseCall(function () {
+                    const result = method.apply(api, arguments).catch(e => {
+                        if (e.statusCode === 422) {
+                            let match = e.message.match(/Nonce.*than (\d+)/);
+                            if (match) {
+                                api.nonce = Math.max(api.nonce, +match[1] + 1);
+                            }
+                            throw e;
+                        } else
+                            throw e;
+                    });
+                    return result;
+                }, api);
+            }
         });
 
-        api.nonce *= 10000;
+        realPrivateApi = api;
         return api;
     }
+}
+
+export function getPrivateApi(test = true) {
+    if (test)
+        return poloniexPrivateApi();
+    else {
+        const { apiKey, apiSecret, userAgent = 'cryptomonitor 0.1' } = Meteor.settings.poloniex;
+        return poloniexPrivateApi(apiKey, apiSecret, userAgent);
+    }
+}
+
+export function getPublicApi() {
+    if (!PublicApi._wrapped) {
+        Constant.OPT_TIMEOUT_SEC = 60;
+        [
+            'volume24',
+            'orderBook',
+            'tradeHistory',
+            'chartData',
+            'currencies',
+            'loanOrders',
+        ].forEach(method => {
+            PublicApi[method] = wrapPromiseCall(PublicApi[method], PublicApi);
+        });
+
+        PublicApi._wrapped = true;
+    }
+
+    return PublicApi;
 }

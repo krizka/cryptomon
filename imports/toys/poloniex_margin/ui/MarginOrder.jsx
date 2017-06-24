@@ -23,7 +23,7 @@ MarginOrderType.options.config = {
     //     sm: [6, 6]
     // }
 };
-const MarginOrderChangeType = fromAstronomy(PoloniexOrderChangeForm, { rateGap: 1 });
+// const MarginOrderChangeType = fromAstronomy(PoloniexOrderChangeForm, { rateGap: 1 });
 
 export const MarginOrder = React.createClass({
     getInitialState() {
@@ -76,14 +76,14 @@ export const MarginOrder = React.createClass({
             <Ticker currencyPair={currencyPair}/>
             {order ?
                 <div>
-                    <Form
-                        ref="form"
-                        onChange={this.onChange}
-                        {...MarginOrderChangeType}
-                        value={this.state.values}
-                    />
-                    <Button onClick={this.closeOrder} bsStyle="danger">Cancel</Button>
-                    <Button onClick={this.changeOrder} className="pull-right" disabled={!orderType}>{orderType || 'Select order type'}</Button>
+                    {/*<Form*/}
+                        {/*ref="form"*/}
+                        {/*onChange={this.onChange}*/}
+                        {/*{...MarginOrderChangeType}*/}
+                        {/*value={this.state.values}*/}
+                    {/*/>*/}
+                    {/*<Button onClick={this.closeOrder} bsStyle="danger">Cancel</Button>*/}
+                    {/*<Button onClick={this.changeOrder} className="pull-right" disabled={!orderType}>{orderType || 'Select order type'}</Button>*/}
                 </div>
                 :
                 <div>
@@ -111,9 +111,9 @@ function makeOrderActions({ currencyPair }, onData) {
         onData(null, { actions, result })
     };
 
-    const actions = {
+    const actions = ReactActions.bind({
         makeOrder(orderForm, order) {
-            const data = { ...orderForm, currencyPair };
+            const data = { ...orderForm, currencyPair, stopLoss };
             Meteor.call('margin.order', data, onResult);
         },
 
@@ -128,7 +128,7 @@ function makeOrderActions({ currencyPair }, onData) {
         onSelect(order) {
             onData(null, { actions, currencyPair: order.currencyPair, order });
         }
-    };
+    });
 
     onData(null, { actions })
 }

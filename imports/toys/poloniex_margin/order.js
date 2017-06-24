@@ -5,9 +5,11 @@
 import t from 'tcomb-form';
 import React from 'react';
 
+import '../../ui/utils/tcomb-astronomy.js';
+
 import { Class, Enum } from 'meteor/jagi:astronomy';
 import { MARGIN_PAIRS } from '../../crypto/currencies';
-import { label } from '/imports/ui/utils/model-labels';
+import { label } from '../../ui/utils/model-labels';
 import { TcombInputButtons } from '../../ui/utils/TcombButtonInput';
 
 export const MARGIN_ORDER_TYPE = Enum.create({
@@ -24,10 +26,10 @@ export const ORDER_STATE = Enum.create({
         CANCELED: 'canceled',
         PLACED: 'placed',
         CLOSED: 'closed',
+        TAKED: 'taked',
         ERROR: 'error',
     }
 });
-
 
 
 const stringNumberTransformer = {
@@ -39,10 +41,18 @@ const stringNumberTransformer = {
     }
 };
 
-export const MarginOrderForm = Class.create({
-    name: 'margin.order.form',
+export const PoloniexMarginOrderCol = new Meteor.Collection('polo_margin_order');
+
+export const MarginOrder = Class.create({
+    name: 'margin.order',
+    collection: PoloniexMarginOrderCol,
+    typeField: '_t',
     fields: {
-        orderType: {
+        simulation: {
+            type: Boolean,
+            default: true,
+        },
+        type: {
             type: String,
             form: {
                 factory: t.form.Radio,
@@ -74,56 +84,50 @@ export const MarginOrderForm = Class.create({
                 },
             }
         },
-        rateGap: {
-            type: Number,
-            form: {
-                template: TcombInputButtons,
-                config: {
-                    options: [
-                        { text: '0.1%', value: 0.1 },
-                        { text: '0.2%', value: 0.2 },
-                        { text: '0.3%', value: 0.3 },
-                        { text: '0.4%', value: 0.4 },
-                        { text: '0.5%', value: 0.5 },
-                    ]
-                },
-            }
-        }, // percent
-        // takeProfit: { type: Number, }, // stop loss percents
-    }
-
-});
-
-export const PoloniexOrderChangeForm = Class.create({
-    name: 'margin.orderUpdateForm',
-    fields: {
-        rateGap: {
-            type: Number,
-            form: {
-                template: TcombInputButtons,
-                config: {
-                    options: [
-                        { text: '0.1%', value: 0.1 },
-                        { text: '0.2%', value: 0.2 },
-                        { text: '0.3%', value: 0.3 },
-                        { text: '0.4%', value: 0.4 },
-                        { text: '0.5%', value: 0.5 },
-                    ]
-                },
-            }
-        }, // percent
-    }
-});
-
-export const PoloniexMarginOrderCol = new Meteor.Collection('polo_margin_order');
-
-export const MarginOrder = MarginOrderForm.inherit({
-    name: 'margin.order',
-    collection: PoloniexMarginOrderCol,
-    fields: {
         rate: { type: Number }, // price we want to buy,
         result: { type: Object }, // order placement result
         state: { type: ORDER_STATE },
+        orderNumber: {
+            type: String,
+            optional: true,
+        },
+        margin: {
+            type: Boolean,
+            default: false,
+        },
+        stopLoss: {
+            type: Number,
+            optional: true,
+            form: { label: label('Stop loss', '%') }
+        }, // percents
+        internal: {
+            type: Boolean,
+            default: true,
+        },
+        stay: { type: Boolean, default: false },
+    },
+
+    helpers: {
+        stopLossRate() {
+            const dir = this.type === 'buy' ? -1 : 1;
+            return this.rate * (1 + dir * this.stopLoss / 100);
+        }
+    },
+
+    behaviors: {
+        timestamp: {}
+    }
+});
+
+export const MarginOrderForm = MarginOrder.createWithFields({
+    name: 'margin.order.form',
+    fields: {},
+    withFields: {
+        simulation: 1,
+        margin: 1,
+        amount: 1,
+        stopLoss: 1,
+        rate: 1,
     }
 });
 
@@ -154,6 +158,7 @@ export const MarginPosition = Class.create({
     name: 'margin.position',
     collection: PoloniexMarginPositionCol,
     fields: {
+        currencyPair: { type: String },
         amount: { type: Number, },
         basePrice: { type: Number, },
         lendingFees: { type: Number, },
@@ -162,5 +167,9 @@ export const MarginPosition = Class.create({
         total: { type: Number, },
         type: { type: String, },
         closeResult: { type: Object, optional: true, },
+    },
+
+    behaviors: {
+        timestamp: {}
     }
 });

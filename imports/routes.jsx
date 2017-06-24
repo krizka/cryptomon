@@ -19,7 +19,7 @@ import { LoansGraphPage } from './ui/pages/LoansGraphPage';
 import { OrderBookPage } from './ui/pages/OrderBookPage';
 import { GraphLayoutPage } from './ui/pages/GraphLayoutPage';
 import { MarginOrderPage } from './ui/pages/MarginOrderPage';
-import { OrdersTableWithData } from './toys/poloniex_ticker/ui/OrdersTable';
+import { OrdersTableWithData } from './toys/poloniex_margin/ui/OrdersTable';
 
 const AppRoutes = (
     <Route path="/" component={AppLayout}>
@@ -39,7 +39,7 @@ const AppRoutes = (
         </Route>
         <Route path="margin" component={GraphLayoutPage}>
             <IndexRedirect to="BTC_BTS"/>
-            <Route path=":currencyPair" component={MarginOrderPage}/>
+            <Route path=":currencyPair" component={OrdersTableWithData}/>
         </Route>
     </Route>
 );

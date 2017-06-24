@@ -5,7 +5,7 @@
 import React from 'react';
 import { Col, Grid, Row, Table } from 'react-bootstrap';
 import { composeWithTracker } from '../../../utils/komposer-utils';
-import { findPoloniexLoansLast, PoloniexLoansCol } from '../loans-col';
+import { findPoloniexLoansLast, PoloniexLoansCol } from '../margin-col';
 
 export const LoansTable = ({ loans }) => {
     const byCurrency = loans.cur;

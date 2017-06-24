@@ -3,3 +3,4 @@
  */
 
 import './poloniex_margin';
+import './poloniex_ticker';
